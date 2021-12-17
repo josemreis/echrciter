@@ -83,7 +83,7 @@ def make_query(url: str, max_retries=5, max_sleep=5):
                 continue
 
 
-def fetch_case_details(app_no: str, max_attempts=5) -> dict:
+def fetch_case_details(app_no: str, max_attempts=5) -> Optional[dict]:
     """make a request to hudoc and return the json data"""
     query_url = TEMPLATE_URL_HUDOC.format(application_number=app_no)
     try:
@@ -98,25 +98,26 @@ def fetch_case_details(app_no: str, max_attempts=5) -> dict:
         raise ValueError("No cases found in hudoc")
     for result_dict in resp_json.get("results"):
         lang_dict = result_dict.get("columns")
-        ## fetch the year
-        ruling_year = str(
-            datetime.strptime(lang_dict.get("kpdate").split(" ")[0], "%m/%d/%Y").year
-        )
-        ## prepare theappno
-        extracted_appno = lang_dict.get("appnoparts").replace(";", "/")
-        lang_number = int(lang_dict.get("languagenumber"))
-        if lang_number <= 2:
-            if lang_number == 1:
-                lang = "en"
-            elif lang_number == 2:
-                lang = "fr"
-        # prepare the dict
-        case_details[lang] = {
-            "title": lang_dict.get("docname"),
-            "date": ruling_year,
-            "number": extracted_appno,
-        }
-    return case_details
+        if lang_dict.get("appnoparts").replace(";", "/") == app_no:
+            ## fetch the year
+            ruling_year = str(
+                datetime.strptime(lang_dict.get("kpdate").split(" ")[0], "%m/%d/%Y").year
+            )
+            ## prepare theappno
+            extracted_appno = lang_dict.get("appnoparts").replace(";", "/")
+            lang_number = int(lang_dict.get("languagenumber"))
+            if lang_number <= 2:
+                if lang_number == 1:
+                    lang = "en"
+                elif lang_number == 2:
+                    lang = "fr"
+            # prepare the dict
+            case_details[lang] = {
+                "title": lang_dict.get("docname"),
+                "date": ruling_year,
+                "number": extracted_appno,
+            }
+        return case_details
 
 
 def roman_numeral_to_int(numeral: str = "VII"):
@@ -177,6 +178,9 @@ def main():
     appno = validate_appno(args.appno.strip())
     ## fetch case detailks
     case_details_raw = fetch_case_details(app_no=appno)
+    if not case_details_raw:
+        print(f"Case {appno} not found in HUDOC's database")
+        sys.exit(1)
     # filter the english version if it exists, else replace the "c." with "v."
     for lang in case_details_raw:
         if lang == "en":

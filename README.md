@@ -24,10 +24,10 @@ python3 echrciter.py -a "42750/09" -n "delrio09"
 
 ```bash
 @jurisdiction{delrio09,
-title={Galan v. Italy (dec.)},
-date={2021},
-number={63772/16},
-pages={63772},
+title={Del Río Prada v. Spain},
+date={2012},
+number={42750/09},
+pages={42750},
 institution={ECHR},
 keywords={echr},
 reporter={ECHR},
