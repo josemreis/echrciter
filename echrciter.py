@@ -188,6 +188,9 @@ def main():
             break
         else:
             case_details = case_details_raw[lang]
+    if not case_details:
+        print(f"No english or french translation of case {appno} found in HUDOC's database")
+        sys.exit(1)
     ## fetch the echr report volume
     reporter_volume = None
     try:
