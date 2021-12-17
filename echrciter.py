@@ -42,6 +42,16 @@ def parse_args() -> argparse.Namespace:
         help="Case application number.",
     )
 
+    parser.add_argument(
+        "-n",
+        "--citation-name",
+        dest="citation_name",
+        nargs="?",
+        type=str,
+        default="fooh",
+        help="Citation name.",
+    )
+
     # parse. If no args display the "help menu"
     if len(sys.argv) == 1:
         parser.print_help()
@@ -152,7 +162,7 @@ def make_bibtex_dict(case_details: dict, volume_number: Optional[int]) -> dict:
         "number": {case_details.get("number")},
         "pages": {case_details.get("number").split("/")[0]},
         "institution": {"ECHR"},
-        "keywords": {"echr"}
+        "keywords": {"echr"},
     }
     if volume_number:
         bibtex_dict["reporter"] = {"ECHR"}
@@ -164,7 +174,7 @@ def main():
     ## parse the arguments
     args = parse_args()
     ## validate the appno
-    appno = validate_appno(args.appno)
+    appno = validate_appno(args.appno.strip())
     ## fetch case detailks
     case_details_raw = fetch_case_details(app_no=appno)
     # filter the english version if it exists, else replace the "c." with "v."
@@ -182,13 +192,13 @@ def main():
         pass
     ## make bibtex dict
     bib_dict = make_bibtex_dict(case_details, reporter_volume)
-    out = "@jurisdiction{fooh,\n"
+    out = "@jurisdiction{{{citation_name},\n".format(citation_name=args.citation_name)
     for entry_key, entry_value in bib_dict.items():
-        out += "\t" + f"{entry_key}:{entry_value}\n"
+        out += f"{entry_key}={entry_value},\n".replace("'", '')
     out += "}"
     ## print
     print(out)
 
+
 if __name__ == "__main__":
     main()
-    
