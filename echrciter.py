@@ -23,7 +23,7 @@ TEMPLATE_URL_ECHR_RECORDS = """https://www.echr.coe.int/app/query/results?query=
 TEMPLATE_URL_HUDOC = """https://hudoc.echr.coe.int/app/query/results?query=contentsitename=ECHR {application_number} AND (doctype:CLIN OR doctype:CLINF)&select=sharepointid,Rank,ECHRRanking,languagenumber,itemid,docname,doctype,application,appno,conclusion,importance,originatingbody,typedescription,kpdate,kpdateAsText,documentcollectionid,documentcollectionid2,languageisocode,extractedappno,isplaceholder,doctypebranch,respondent,advopidentifier,advopstatus,ecli,appnoparts,sclappnos&sort=&start=0&length=500"""
 
 
-class NoCases(Exception):
+class CaseNotFound(Exception):
     pass
 
 def parse_args() -> argparse.Namespace:
@@ -98,7 +98,7 @@ def fetch_case_details(app_no: str, max_attempts=5) -> Optional[dict]:
     ## extract the relevant case details
     case_details = {}
     if resp_json.get("resultcount") < 1:
-        raise NoCases("No cases found in hudoc")
+        raise CaseNotFound("No cases found in hudoc")
     for result_dict in resp_json.get("results"):
         lang_dict = result_dict.get("columns")
         if lang_dict.get("appnoparts").replace(";", "/") == app_no:
@@ -182,7 +182,7 @@ def main():
     ## fetch case detailks
     try:  
         case_details_raw = fetch_case_details(app_no=appno)
-    except NoCases:
+    except CaseNotFound:
         case_details_raw = None
         pass
     if not case_details_raw:
