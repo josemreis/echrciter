@@ -1,9 +1,9 @@
 # echrciter 
 
-Make oscola-style bibetex citations for echr cases
+Make oscola-style bibtex citations for echr cases
 
 ```bash
-usage: echr_citer.py [-h] [-a [APPNO]] [-n [CITATION_NAME]]
+usage: echrciter.py [-h] [-a [APPNO]] [-n [CITATION_NAME]]
 
 Generate a bibtex citation for an ECtHR case
 
